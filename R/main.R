@@ -78,6 +78,7 @@ rapper = function(execute, drivingValues, ..., initValues = list()) {
 #' @return A list containing the return values from the model \code{execute}
 #'   function (see \code{\link{rapper}}). Each item in the list represents model
 #'   output for each timestep.
+#' @export
 executeRapper = function(rapper) {
   environment(updateAndExecute) = rapper
   lapply(0:(nrow(rapper$.config$drivingValues) - 1), updateAndExecute, rapper = rapper)
