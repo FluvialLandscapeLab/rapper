@@ -1,5 +1,35 @@
 # execute function must rely on variables in the rapper env. Execute function
 # must take only the model environment as an argument.
+
+#' Create Rapper Object
+#'
+#' Creates an S3 object consisting of an environment with the \code{class}
+#' attribute set to "rapper." This object is then passed to
+#' \code{\link{executeRapper}} to execute a model in the rapper environment.
+#' @param execute A function containing model code. This function will be
+#'   executed iteratively, once for each timestep (see \code{drivingValues}
+#'   argument). The function should accept one and only one argument
+#'   representing the \code{environment} within which model parameters, driving
+#'   values, and state variables exist, typically a \code{rapper} object.
+#' @param drivingValues A \code{data.frame} with columns named for driving
+#'   variables required by the function associated with the \code{execute} argument.
+#'   Each row represents the values of the driving variables for one timestep.
+#'   The \code{row.names} must be equal to \code{0:nTimeSteps} where nTimeSteps
+#'   is the number of timesteps to execute the simulation.
+#' @param ... Named arguments describing model parameters or inital conidtion
+#'   for state variables where the name of the argument represents the variable
+#'   name that will store the parameter value within the rapper environment.
+#' @param initValues An alternative way to specify parameters and initial values
+#'   of state variables using a named list. May be used in conjunction with
+#'   \code{...} arguments.
+#' @return Returns a rapper object (an \code{environment} with the \code{class}
+#'   attribute set to "rapper"). The rapper object contains \code{names} bound
+#'   to parameter values and initial state variable values passed in by the
+#'   user. It also contains a sub-\code{environment} called ".config" containing
+#'   the driving variables \code{data.frame} and the \code{execute} function
+#'   passed in by the user.
+#' @export
+
 rapper = function(execute, drivingValues, ..., initValues = list()) {
 
   if(!is.data.frame(drivingValues)) stop("Argument 'drivingValues' must be (or inherit from) a data.frame.")
@@ -40,6 +70,14 @@ rapper = function(execute, drivingValues, ..., initValues = list()) {
   # rapper$init(rapper, ...)
 #}
 
+#' Execute A "Rapped" Model
+#'
+#' Iterative execution of a simulation model built as a \code{\link{rapper}}
+#' object.
+#' @param rapper A model built as a \code{\link{rapper}} object.
+#' @return A list containing the return values from the model \code{execute}
+#'   function (see \code{\link{rapper}}). Each item in the list represents model
+#'   output for each timestep.
 executeRapper = function(rapper) {
   environment(updateAndExecute) = rapper
   lapply(0:(nrow(rapper$.config$drivingValues) - 1), updateAndExecute, rapper = rapper)

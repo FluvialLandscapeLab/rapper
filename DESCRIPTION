@@ -1,11 +1,11 @@
 Package: rapper
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Iterative execution of functions representing simulation models
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Mathew Bain, Geoffrey Poole
+Maintainer: Geoffrey Poole <gpoole@montana.edu>
+Description: Facilitates execution of a simulation model written as an R function. The model function is embedded in a special environment where all model parameters, state variables, and driving variables reside. This package can automatically call the model function iteratively while updating driving variables in the model environment.
+License: Not established yet, contact maintainer
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
