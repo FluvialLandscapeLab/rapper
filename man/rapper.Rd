@@ -19,9 +19,9 @@ Each row represents the values of the driving variables for one timestep.
 The \code{row.names} must be equal to \code{0:nTimeSteps} where nTimeSteps
 is the number of timesteps to execute the simulation.}
 
-\item{...}{Named arguments describing model parameters or inital conidtion
+\item{...}{Named arguments describing model parameters or inital condition
 for state variables where the name of the argument represents the variable
-name that will store the parameter value within the rapper environment.}
+name that will store the state variable or parameter value within the rapper environment.}
 
 \item{initValues}{An alternative way to specify parameters and initial values
 of state variables using a named list. May be used in conjunction with

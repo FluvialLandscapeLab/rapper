@@ -6,11 +6,13 @@
 #' attribute set to "rapper." This object is then passed to
 #' \code{\link{executeRapper}} to execute a model in the rapper environment.
 #'
-#' @param execute A function containing model code. This function will be
-#'   executed iteratively, once for each timestep (see \code{drivingValues}
-#'   argument). The function should accept one and only one argument
-#'   representing the \code{environment} within which model parameters, driving
-#'   values, and state variables exist, typically a \code{rapper} object.
+#' @param execute A function containing model code, or a list of functions to be
+#'   concatenated together into a single function. The resuling execute function
+#'   will be executed iteratively, once for each timestep (see
+#'   \code{drivingValues} argument). The function (or functions in the list)
+#'   should accept one and only one argument representing the \code{environment}
+#'   within which model parameters, driving values, and state variables exist,
+#'   typically a \code{rapper} object.
 #' @param drivingValues A \code{data.frame} with columns named for driving
 #'   variables required by the function associated with the \code{execute} argument.
 #'   Each row represents the values of the driving variables for one timestep.
@@ -39,6 +41,20 @@ rapper = function(execute, drivingValues, ..., initValues = list()) {
   # set parent environment to make the new rapper env a sibling of the global environment
   newRapper = new.env(parent = parent.env(globalenv()))
   newRapper$.config = new.env(parent = newRapper)
+
+  # Check if the execute argument is a function or a list of functions.
+  # If execute is a list of functions, concatenate them together into a single function.
+  if(class(execute) == "function"){
+    execute <- execute
+  }else if(class(execute = "list")){
+    if(all(lapply(execute, class) == "function")){
+      execute <- concatenateFunctions(funList = execute)
+    }else{
+      (error("All elements in an execute list must be functions"))
+    }
+  }else{
+    error("The execute argument must be a function or list of functions")
+  }
 
   # install the objects passed to the function
   newRapper$.config$drivingValues = drivingValues
@@ -84,6 +100,22 @@ updateAndExecute = function(rapper, timeStep) {
   if(!(as.character(timeStep) %in% row.names(.config$drivingValues))) stop("The timestep '", timeStep, "' was not found as a row name in the driving values." )
   # Should there be a rapper$ before the .config below? or is the rapper in the last line of this function unnecessary???
   currentDrivingValues = .config$drivingValues[as.character(timeStep),]
+  # If drivingValues only has one column, R doesn't retain the names in the output which breaks the call to mapply.
+  names(currentDrivingValues) <- names(.config$drivingValues)
   mapply(assign, x = names(currentDrivingValues), value = currentDrivingValues, MoreArgs = list(envir = rapper))
   rapper$.config$execute(rapper)
+}
+
+concatenateFunctions <- function(funList){
+  funBodies <- unlist(
+    lapply(
+      funList,
+      function(fun) {
+        bText = trimws(capture.output(print(body(fun))))
+        return(bText[2:(length(bText)-1)])
+      }
+    )
+  )
+  combinedFunction <- eval(parse(text = c("function(rapper = parent.frame()){", funBodies, "}")))
+  return(combinedFunction)
 }
