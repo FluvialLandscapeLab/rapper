@@ -7,11 +7,13 @@
 rapper(execute, drivingValues, ..., initValues = list())
 }
 \arguments{
-\item{execute}{A function containing model code. This function will be
-executed iteratively, once for each timestep (see \code{drivingValues}
-argument). The function should accept one and only one argument
-representing the \code{environment} within which model parameters, driving
-values, and state variables exist, typically a \code{rapper} object.}
+\item{execute}{A function containing model code, or a list of functions to be
+concatenated together into a single function. The resuling execute function
+will be executed iteratively, once for each timestep (see
+\code{drivingValues} argument). The function (or functions in the list)
+should accept one and only one argument representing the \code{environment}
+within which model parameters, driving values, and state variables exist,
+typically a \code{rapper} object.}
 
 \item{drivingValues}{A \code{data.frame} with columns named for driving
 variables required by the function associated with the \code{execute} argument.
@@ -19,9 +21,9 @@ Each row represents the values of the driving variables for one timestep.
 The \code{row.names} must be equal to \code{0:nTimeSteps} where nTimeSteps
 is the number of timesteps to execute the simulation.}
 
-\item{...}{Named arguments describing model parameters or inital conidtion
+\item{...}{Named arguments describing model parameters or inital condition
 for state variables where the name of the argument represents the variable
-name that will store the parameter value within the rapper environment.}
+name that will store the state variable or parameter value within the rapper environment.}
 
 \item{initValues}{An alternative way to specify parameters and initial values
 of state variables using a named list. May be used in conjunction with
